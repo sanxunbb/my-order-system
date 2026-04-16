@@ -1,0 +1,3471 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>甜心小厨・宝贝专属点菜系统</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary-color: #64b5f6;
+        --secondary-color: #90caf9;
+        --light-blue: #e3f2fd;
+        --dark-blue: #42a5f5;
+        --bg-color: #f8fafc;
+        --card-color: #ffffff;
+        --text-primary: #2d3748;
+        --text-secondary: #718096;
+        --accent-color: #ff80ab;
+        --success-color: #81c784;
+        --border-radius-btn: 8px;
+        --border-radius-card: 12px;
+        --border-radius-input: 6px;
+      }
+
+      body {
+        font-family: "Microsoft YaHei", Arial, sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-primary);
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
+
+      /* 页面容器 */
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 16px;
+      }
+
+      /* 顶部导航栏 */
+      .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background-color: var(--primary-color);
+        color: white;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        z-index: 1000;
+        box-shadow: 0 2px 10px rgba(22, 93, 255, 0.3);
+      }
+
+      .navbar-left {
+        display: flex;
+        align-items: center;
+      }
+
+      .avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-color);
+        font-weight: bold;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+      }
+
+      .avatar:hover {
+        transform: scale(1.1);
+      }
+
+      .navbar-title {
+        flex: 1;
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        margin: 0 16px;
+      }
+
+      .cart-btn {
+        position: relative;
+        background-color: rgba(255, 255, 255, 0.2);
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      .cart-btn:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+      }
+
+      .cart-badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background-color: #ff4d4f;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* 主题Banner */
+      .banner {
+        margin-top: 70px;
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        color: white;
+        padding: 60px 20px;
+        text-align: center;
+        border-radius: var(--border-radius-card);
+        margin-bottom: 20px;
+      }
+
+      .banner h1 {
+        font-size: 28px;
+        margin-bottom: 16px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .banner p {
+        font-size: 16px;
+        opacity: 0.9;
+      }
+
+      /* 菜品分类导航 */
+      .category-nav {
+        display: flex;
+        overflow-x: auto;
+        gap: 12px;
+        padding: 16px 0;
+        margin-bottom: 20px;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+
+      .category-nav::-webkit-scrollbar {
+        display: none;
+      }
+
+      .category-item {
+        padding: 8px 16px;
+        border-radius: 20px;
+        background-color: var(--light-blue);
+        color: var(--primary-color);
+        font-size: 14px;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+      }
+
+      .category-item.active {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+      }
+
+      .category-item:hover {
+        background-color: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+      }
+
+      /* 菜品列表 */
+      .dish-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 16px;
+        margin-bottom: 80px;
+      }
+
+      .dish-card {
+        background-color: var(--card-color);
+        border-radius: var(--border-radius-card);
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        position: relative;
+      }
+
+      .dish-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        border: 1px solid var(--primary-color);
+      }
+
+      .dish-image {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+      }
+
+      .dish-info {
+        padding: 12px;
+      }
+
+      .dish-name {
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 4px;
+        color: var(--text-primary);
+      }
+
+      .dish-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 6px;
+      }
+
+      .dish-desc {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+        line-height: 1.4;
+      }
+
+      .dish-price {
+        font-size: 16px;
+        font-weight: bold;
+        color: var(--dark-blue);
+        margin-bottom: 8px;
+      }
+
+      .dish-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .add-btn {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .add-btn:hover {
+        background-color: var(--dark-blue);
+        transform: scale(1.1);
+      }
+
+      .dish-quantity {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .quantity-btn {
+        background-color: var(--light-blue);
+        color: var(--primary-color);
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .quantity-btn:hover {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      .quantity-value {
+        font-size: 14px;
+        font-weight: bold;
+        min-width: 20px;
+        text-align: center;
+      }
+
+      /* 底部固定操作栏 */
+      .bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: var(--primary-color);
+        color: white;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 -2px 10px rgba(22, 93, 255, 0.3);
+      }
+
+      .total-amount {
+        font-size: 18px;
+        font-weight: bold;
+      }
+
+      .checkout-btn {
+        background-color: white;
+        color: var(--primary-color);
+        border: none;
+        border-radius: var(--border-radius-btn);
+        padding: 8px 24px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .checkout-btn:hover {
+        background-color: var(--light-blue);
+        transform: translateY(-2px);
+      }
+
+      /* 购物车页面 */
+      .cart-page {
+        padding-top: 90px;
+        padding-bottom: 100px;
+      }
+
+      .cart-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .back-btn {
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        margin-right: 16px;
+        color: var(--text-primary);
+      }
+
+      .cart-title {
+        font-size: 20px;
+        font-weight: bold;
+        color: var(--text-primary);
+      }
+
+      .cart-empty {
+        text-align: center;
+        padding: 60px 0;
+        color: var(--text-secondary);
+      }
+
+      .cart-items {
+        margin-bottom: 20px;
+      }
+
+      .cart-item {
+        background-color: var(--card-color);
+        border-radius: var(--border-radius-card);
+        padding: 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .cart-item-info {
+        flex: 1;
+      }
+
+      .cart-item-name {
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 4px;
+      }
+
+      .cart-item-note {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+      }
+
+      .cart-item-price {
+        font-size: 16px;
+        font-weight: bold;
+        color: var(--dark-blue);
+      }
+
+      .cart-item-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .cart-item-quantity {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .delete-btn {
+        background-color: #ff4d4f;
+        color: white;
+        border: none;
+        border-radius: var(--border-radius-btn);
+        padding: 4px 8px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .delete-btn:hover {
+        background-color: #ff7875;
+      }
+
+      .menu-delete-btn {
+        background-color: rgba(255, 77, 79, 0.96);
+        color: #ffffff;
+        border: none;
+        border-radius: 10px;
+        padding: 6px 10px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+      }
+
+      .menu-delete-btn:hover {
+        background-color: rgba(255, 120, 117, 0.96);
+        transform: translateY(-1px);
+      }
+
+      .note-section {
+        background-color: var(--card-color);
+        border-radius: var(--border-radius-card);
+        padding: 16px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .note-label {
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 8px;
+        color: var(--text-primary);
+      }
+
+      .note-input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #e8e8e8;
+        border-radius: var(--border-radius-input);
+        resize: vertical;
+        min-height: 80px;
+        font-size: 14px;
+        font-family: inherit;
+        transition: all 0.3s ease;
+      }
+
+      .note-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        background-color: var(--light-blue);
+      }
+
+      .cart-summary {
+        background-color: var(--card-color);
+        border-radius: var(--border-radius-card);
+        padding: 16px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+
+      .summary-label {
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+
+      .summary-value {
+        font-size: 14px;
+        color: var(--text-primary);
+      }
+
+      .summary-total {
+        font-size: 18px;
+        font-weight: bold;
+        color: var(--dark-blue);
+      }
+
+      .cart-actions {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      .continue-btn {
+        flex: 1;
+        background-color: var(--light-blue);
+        color: var(--primary-color);
+        border: 1px solid var(--primary-color);
+        border-radius: var(--border-radius-btn);
+        padding: 12px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .continue-btn:hover {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      .confirm-btn {
+        flex: 1;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: var(--border-radius-btn);
+        padding: 12px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .confirm-btn:hover {
+        background-color: var(--dark-blue);
+        transform: translateY(-2px);
+      }
+
+      /* 订单确认页 */
+      .order-confirm-page {
+        padding-top: 90px;
+        padding-bottom: 100px;
+      }
+
+      .order-info {
+        background-color: var(--card-color);
+        border-radius: var(--border-radius-card);
+        padding: 16px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .order-info-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+
+      .order-dishes {
+        background-color: var(--card-color);
+        border-radius: var(--border-radius-card);
+        padding: 16px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .order-dish-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #e8e8e8;
+      }
+
+      .order-dish-info {
+        flex: 1;
+      }
+
+      .order-dish-name {
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 4px;
+      }
+
+      .order-dish-detail {
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+
+      /* 付款页 */
+      .payment-page {
+        padding-top: 90px;
+        padding-bottom: 100px;
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        min-height: 100vh;
+      }
+
+      .payment-container {
+        background-color: var(--card-color);
+        border-radius: var(--border-radius-card);
+        padding: 24px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      }
+
+      .payment-header {
+        text-align: center;
+        margin-bottom: 24px;
+      }
+
+      .payment-amount {
+        font-size: 32px;
+        font-weight: bold;
+        color: var(--dark-blue);
+        margin-bottom: 8px;
+      }
+
+      .payment-methods {
+        margin-bottom: 24px;
+      }
+
+      .payment-method {
+        display: flex;
+        align-items: center;
+        padding: 16px;
+        border: 1px solid #e8e8e8;
+        border-radius: var(--border-radius-card);
+        margin-bottom: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .payment-method:hover {
+        border-color: var(--primary-color);
+        background-color: var(--light-blue);
+      }
+
+      .payment-method.active {
+        border-color: var(--primary-color);
+        background-color: var(--light-blue);
+      }
+
+      .payment-method-icon {
+        width: 40px;
+        height: 40px;
+        margin-right: 16px;
+      }
+
+      .payment-method-name {
+        flex: 1;
+        font-size: 14px;
+        font-weight: bold;
+      }
+
+      .payment-method-check {
+        color: var(--primary-color);
+        font-size: 20px;
+      }
+
+      .free-payment {
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        color: white;
+        text-align: center;
+        padding: 20px;
+        border-radius: var(--border-radius-card);
+        margin-bottom: 24px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .free-payment:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(22, 93, 255, 0.4);
+      }
+
+      .free-payment h3 {
+        margin-bottom: 8px;
+      }
+
+      /* 评论页 */
+      .review-page {
+        padding-top: 90px;
+        padding-bottom: 100px;
+      }
+
+      .review-header {
+        text-align: center;
+        margin-bottom: 24px;
+      }
+
+      .review-header h2 {
+        color: var(--primary-color);
+        margin-bottom: 8px;
+      }
+
+      .rating-section {
+        background-color: var(--card-color);
+        border-radius: var(--border-radius-card);
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .rating-item {
+        margin-bottom: 16px;
+      }
+
+      .rating-label {
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 8px;
+        color: var(--text-primary);
+      }
+
+      .stars {
+        display: flex;
+        gap: 8px;
+      }
+
+      .star {
+        font-size: 24px;
+        color: #e8e8e8;
+        cursor: pointer;
+        transition: color 0.3s ease;
+      }
+
+      .star.active {
+        color: #ffd700;
+      }
+
+      .review-input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #e8e8e8;
+        border-radius: var(--border-radius-input);
+        resize: vertical;
+        min-height: 120px;
+        font-size: 14px;
+        font-family: inherit;
+        margin-bottom: 16px;
+        transition: all 0.3s ease;
+      }
+
+      .review-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        background-color: var(--light-blue);
+      }
+
+      /* 个人中心页 */
+      .profile-page {
+        padding-top: 90px;
+        padding-bottom: 20px;
+      }
+
+      .profile-header {
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        color: white;
+        padding: 32px 20px;
+        border-radius: var(--border-radius-card);
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      .profile-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background-color: white;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        font-weight: bold;
+        margin: 0 auto 16px;
+      }
+
+      .profile-name {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 8px;
+      }
+
+      .profile-actions {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      .profile-action-item {
+        background-color: var(--card-color);
+        border-radius: var(--border-radius-card);
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .profile-action-item:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        border: 1px solid var(--primary-color);
+      }
+
+      .profile-action-icon {
+        font-size: 32px;
+        color: var(--primary-color);
+        margin-bottom: 8px;
+      }
+
+      .profile-action-name {
+        font-size: 14px;
+        font-weight: bold;
+        color: var(--text-primary);
+      }
+
+      /* 设置页面 */
+      .settings-content {
+        background-color: var(--card-color);
+        border-radius: var(--border-radius-card);
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .setting-item {
+        margin-bottom: 20px;
+      }
+
+      .setting-item label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: var(--text-primary);
+      }
+
+      .setting-item input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #e8e8e8;
+        border-radius: var(--border-radius-input);
+        font-size: 14px;
+        transition: all 0.3s ease;
+      }
+
+      .setting-item input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        background-color: var(--light-blue);
+      }
+
+      .save-btn {
+        margin-top: 8px;
+        padding: 8px 16px;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: var(--border-radius-btn);
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .save-btn:hover {
+        background-color: var(--secondary-color);
+      }
+
+      /* 添加菜单页面 */
+      .add-dish-content {
+        background-color: var(--card-color);
+        border-radius: var(--border-radius-card);
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .form-item {
+        margin-bottom: 20px;
+      }
+
+      .form-item label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: var(--text-primary);
+      }
+
+      .form-item input,
+      .form-item textarea,
+      .form-item select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #e8e8e8;
+        border-radius: var(--border-radius-input);
+        font-size: 14px;
+        font-family: inherit;
+        transition: all 0.3s ease;
+      }
+
+      .form-item textarea {
+        resize: vertical;
+        min-height: 100px;
+      }
+
+      .form-item input:focus,
+      .form-item textarea:focus,
+      .form-item select:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        background-color: var(--light-blue);
+      }
+
+      /* 收藏按钮 */
+      .favorite-btn {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        font-size: 20px;
+        color: #e8e8e8;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        flex: 0 0 auto;
+      }
+
+      .favorite-btn.active {
+        color: var(--accent-color);
+      }
+
+      .favorite-btn:hover {
+        transform: scale(1.2);
+      }
+
+      /* 历史订单页 */
+      .history-page {
+        padding-top: 90px;
+        padding-bottom: 20px;
+      }
+
+      .order-card {
+        background-color: var(--card-color);
+        border-radius: var(--border-radius-card);
+        padding: 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+      }
+
+      .order-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      }
+
+      .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .order-id {
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+
+      .order-status {
+        font-size: 14px;
+        font-weight: bold;
+        color: var(--primary-color);
+      }
+
+      .order-dish-list {
+        margin-bottom: 12px;
+      }
+
+      .order-dish-summary {
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+      }
+
+      .order-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .order-amount {
+        font-size: 16px;
+        font-weight: bold;
+        color: var(--dark-blue);
+      }
+
+      .order-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .order-action-btn {
+        background-color: var(--light-blue);
+        color: var(--primary-color);
+        border: 1px solid var(--primary-color);
+        border-radius: var(--border-radius-btn);
+        padding: 4px 12px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .order-action-btn:hover {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      /* 弹窗 */
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        display: none;
+      }
+
+      .modal.active {
+        display: flex;
+      }
+
+      .modal-content {
+        background-color: var(--card-color);
+        border-radius: var(--border-radius-card);
+        padding: 24px;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .modal-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: var(--text-primary);
+      }
+
+      .modal-close {
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        color: var(--text-secondary);
+      }
+
+      .modal-body {
+        margin-bottom: 20px;
+      }
+
+      .modal-footer {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+      }
+
+      .modal-btn {
+        padding: 8px 16px;
+        border-radius: var(--border-radius-btn);
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .modal-btn-secondary {
+        background-color: #f0f0f0;
+        color: var(--text-primary);
+        border: none;
+      }
+
+      .modal-btn-primary {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+      }
+
+      .modal-btn-primary:hover {
+        background-color: var(--dark-blue);
+      }
+
+      /* Toast提示 */
+      .toast {
+        position: fixed;
+        top: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: var(--primary-color);
+        color: white;
+        padding: 12px 24px;
+        border-radius: var(--border-radius-btn);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        z-index: 3000;
+        display: none;
+        animation: slideDown 0.3s ease;
+      }
+
+      .toast.active {
+        display: block;
+      }
+
+      @keyframes slideDown {
+        from {
+          top: -50px;
+          opacity: 0;
+        }
+        to {
+          top: 100px;
+          opacity: 1;
+        }
+      }
+
+      /* 爱心动画 */
+      .heart-animation {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 100px;
+        color: var(--primary-color);
+        opacity: 0;
+        z-index: 4000;
+        animation: heartBeat 1.5s ease-in-out;
+      }
+
+      @keyframes heartBeat {
+        0% {
+          transform: translate(-50%, -50%) scale(0);
+          opacity: 0;
+        }
+        50% {
+          transform: translate(-50%, -50%) scale(1.2);
+          opacity: 1;
+        }
+        100% {
+          transform: translate(-50%, -50%) scale(1);
+          opacity: 0;
+        }
+      }
+
+      /* 隐藏页面 */
+      .page {
+        display: none;
+      }
+
+      .page.active {
+        display: block;
+      }
+
+      /* 响应式设计 */
+      @media (max-width: 768px) {
+        .dish-list {
+          grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        }
+
+        .banner h1 {
+          font-size: 24px;
+        }
+
+        .payment-amount {
+          font-size: 24px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .dish-list {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .navbar-title {
+          font-size: 16px;
+        }
+
+        .total-amount {
+          font-size: 16px;
+        }
+
+        .checkout-btn {
+          padding: 8px 16px;
+          font-size: 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+      <div class="navbar-left">
+        <div class="avatar" onclick="showPage('profilePage')">宝</div>
+      </div>
+      <div class="navbar-title">甜心小厨</div>
+      <button class="cart-btn" onclick="showPage('cartPage')">
+        🛒
+        <span class="cart-badge" id="cartBadge">0</span>
+      </button>
+    </nav>
+
+    <!-- Toast提示 -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 爱心动画 -->
+    <div class="heart-animation" id="heartAnimation">❤️</div>
+
+    <!-- 首页 -->
+    <div class="page active" id="homePage">
+      <div class="container">
+        <!-- 主题Banner -->
+        <div class="banner">
+          <h1>宝贝今天想吃什么呀😘</h1>
+          <p>这里有你喜欢的所有美食，快来点吧～</p>
+        </div>
+
+        <!-- 菜品分类导航 -->
+        <div class="category-nav">
+          <div class="category-item active" data-category="all">全部</div>
+          <div class="category-item" data-category="signature">招牌必点</div>
+          <div class="category-item" data-category="hot">热菜</div>
+          <div class="category-item" data-category="cold">凉菜</div>
+          <div class="category-item" data-category="dessert">甜品</div>
+          <div class="category-item" data-category="drink">饮品</div>
+          <div class="category-item" data-category="staple">主食</div>
+          <div class="category-item" data-category="favorite">宝贝收藏</div>
+        </div>
+
+        <!-- 菜品列表 -->
+        <div class="dish-list" id="dishList">
+          <!-- 菜品卡片将通过JavaScript动态生成 -->
+        </div>
+      </div>
+
+      <!-- 底部固定操作栏 -->
+      <div class="bottom-bar">
+        <div class="total-amount">合计：¥<span id="totalAmount">0</span></div>
+        <button class="checkout-btn" onclick="showPage('cartPage')">
+          查看已点 / 去结算
+        </button>
+      </div>
+    </div>
+
+    <!-- 购物车页面 -->
+    <div class="page" id="cartPage">
+      <div class="container cart-page">
+        <div class="cart-header">
+          <button class="back-btn" onclick="showPage('homePage')">←</button>
+          <h2 class="cart-title">宝贝的已点菜单</h2>
+        </div>
+
+        <div class="cart-empty" id="cartEmpty">
+          <p>还没有点任何菜品哦～</p>
+          <button
+            class="continue-btn"
+            onclick="showPage('homePage')"
+            style="margin-top: 16px"
+          >
+            去点菜
+          </button>
+        </div>
+
+        <div class="cart-items" id="cartItems">
+          <!-- 购物车菜品将通过JavaScript动态生成 -->
+        </div>
+
+        <div class="note-section">
+          <div class="note-label">整单备注</div>
+          <textarea
+            class="note-input"
+            placeholder="宝贝有什么特殊要求都可以写在这里哦～"
+            id="orderNote"
+          ></textarea>
+        </div>
+
+        <div class="cart-summary">
+          <div class="summary-row">
+            <span class="summary-label">菜品总数</span>
+            <span class="summary-value" id="totalQuantity">0</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">菜品总价</span>
+            <span class="summary-value">¥<span id="subtotal">0</span></span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">专属优惠</span>
+            <span class="summary-value">-¥<span id="discount">0</span></span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">实付金额</span>
+            <span class="summary-value summary-total"
+              >¥<span id="finalAmount">0</span></span
+            >
+          </div>
+        </div>
+
+        <div class="cart-actions">
+          <button class="continue-btn" onclick="showPage('homePage')">
+            继续加菜
+          </button>
+          <button class="confirm-btn" onclick="showPage('orderConfirmPage')">
+            去确认订单
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 订单确认页 -->
+    <div class="page" id="orderConfirmPage">
+      <div class="container order-confirm-page">
+        <div class="cart-header">
+          <button class="back-btn" onclick="showPage('cartPage')">←</button>
+          <h2 class="cart-title">订单确认</h2>
+        </div>
+
+        <div class="order-info">
+          <div class="order-info-item">
+            <span>用餐人数</span>
+            <span>2人</span>
+          </div>
+          <div class="order-info-item">
+            <span>预计用餐时间</span>
+            <span>15分钟</span>
+          </div>
+          <div class="order-info-item">
+            <span>用餐位置</span>
+            <span>客厅</span>
+          </div>
+        </div>
+
+        <div class="order-dishes">
+          <h3 style="margin-bottom: 16px; color: var(--text-primary)">
+            菜品清单
+          </h3>
+          <div id="orderDishList">
+            <!-- 订单菜品将通过JavaScript动态生成 -->
+          </div>
+        </div>
+
+        <div class="cart-summary">
+          <div class="summary-row">
+            <span class="summary-label">菜品总数</span>
+            <span class="summary-value" id="confirmTotalQuantity">0</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">菜品总价</span>
+            <span class="summary-value"
+              >¥<span id="confirmSubtotal">0</span></span
+            >
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">专属优惠</span>
+            <span class="summary-value"
+              >-¥<span id="confirmDiscount">0</span></span
+            >
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">实付金额</span>
+            <span class="summary-value summary-total"
+              >¥<span id="confirmFinalAmount">0</span></span
+            >
+          </div>
+        </div>
+
+        <div class="cart-actions">
+          <button class="continue-btn" onclick="showPage('cartPage')">
+            返回修改
+          </button>
+          <button class="confirm-btn" onclick="showPage('paymentPage')">
+            去付款
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 付款页 -->
+    <div class="page" id="paymentPage">
+      <div class="container payment-page">
+        <div class="payment-container">
+          <div class="payment-header">
+            <h2>宝贝本次用餐一共</h2>
+            <div class="payment-amount">¥<span id="paymentAmount">0</span></div>
+          </div>
+
+          <div class="payment-methods">
+            <div class="payment-method active" data-method="wechat">
+              <img
+                src="https://img.icons8.com/color/48/000000/wechat-pay.png"
+                class="payment-method-icon"
+              />
+              <span class="payment-method-name">微信支付</span>
+              <span class="payment-method-check">✓</span>
+            </div>
+            <div class="payment-method" data-method="alipay">
+              <img
+                src="https://img.icons8.com/color/48/000000/alipay.png"
+                class="payment-method-icon"
+              />
+              <span class="payment-method-name">支付宝支付</span>
+              <span class="payment-method-check"></span>
+            </div>
+          </div>
+
+          <div class="free-payment" onclick="paySuccess()">
+            <h3>宝贝免单</h3>
+            <p>点击直接支付成功</p>
+          </div>
+
+          <button
+            class="confirm-btn"
+            style="width: 100%"
+            onclick="paySuccess()"
+          >
+            确认支付
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 评论页 -->
+    <div class="page" id="reviewPage">
+      <div class="container review-page">
+        <div class="cart-header">
+          <button class="back-btn" onclick="showPage('profilePage')">←</button>
+          <h2 class="cart-title">用餐评价</h2>
+        </div>
+
+        <div class="review-header">
+          <h2>宝贝对今天的美食有什么想说的呀😉</h2>
+        </div>
+
+        <div class="rating-section">
+          <div class="rating-item">
+            <div class="rating-label">整体评分</div>
+            <div class="stars" data-rating="overall">
+              <span class="star active">★</span>
+              <span class="star active">★</span>
+              <span class="star active">★</span>
+              <span class="star active">★</span>
+              <span class="star active">★</span>
+            </div>
+          </div>
+          <div class="rating-item">
+            <div class="rating-label">菜品口味</div>
+            <div class="stars" data-rating="taste">
+              <span class="star active">★</span>
+              <span class="star active">★</span>
+              <span class="star active">★</span>
+              <span class="star active">★</span>
+              <span class="star active">★</span>
+            </div>
+          </div>
+          <div class="rating-item">
+            <div class="rating-label">上菜速度</div>
+            <div class="stars" data-rating="speed">
+              <span class="star active">★</span>
+              <span class="star active">★</span>
+              <span class="star active">★</span>
+              <span class="star active">★</span>
+              <span class="star active">★</span>
+            </div>
+          </div>
+          <div class="rating-item">
+            <div class="rating-label">用心程度</div>
+            <div class="stars" data-rating="effort">
+              <span class="star active">★</span>
+              <span class="star active">★</span>
+              <span class="star active">★</span>
+              <span class="star active">★</span>
+              <span class="star active">★</span>
+            </div>
+          </div>
+          <div class="rating-item">
+            <div class="rating-label">宝贝的需求和建议</div>
+            <textarea
+              class="review-input"
+              placeholder="宝贝有什么建议、想吃的菜、或者想对我说的话，都可以写在这里哦～"
+              id="reviewContent"
+            ></textarea>
+          </div>
+          <button
+            class="confirm-btn"
+            style="width: 100%"
+            onclick="submitReview()"
+          >
+            提交评价
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 个人中心页 -->
+    <div class="page" id="profilePage">
+      <div class="container profile-page">
+        <div class="profile-header">
+          <div class="profile-avatar" id="profileAvatar">宝</div>
+          <div class="profile-name" id="profileName">宝贝</div>
+          <p>欢迎来到甜心小厨</p>
+        </div>
+
+        <div class="profile-actions">
+          <div class="profile-action-item" onclick="showPage('historyPage')">
+            <div class="profile-action-icon">📋</div>
+            <div class="profile-action-name">历史订单</div>
+          </div>
+          <div class="profile-action-item" onclick="showPage('reviewPage')">
+            <div class="profile-action-icon">⭐</div>
+            <div class="profile-action-name">我的评价</div>
+          </div>
+          <div class="profile-action-item" onclick="showFavorites()">
+            <div class="profile-action-icon">❤️</div>
+            <div class="profile-action-name">我的收藏</div>
+          </div>
+          <div class="profile-action-item" onclick="showPage('settingsPage')">
+            <div class="profile-action-icon">⚙️</div>
+            <div class="profile-action-name">设置</div>
+          </div>
+          <div class="profile-action-item" onclick="showPage('addDishPage')">
+            <div class="profile-action-icon">➕</div>
+            <div class="profile-action-name">添加菜单</div>
+          </div>
+          <div class="profile-action-item" onclick="showPage('homePage')">
+            <div class="profile-action-icon">🏠</div>
+            <div class="profile-action-name">返回首页</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 设置页面 -->
+    <div class="page" id="settingsPage">
+      <div class="container">
+        <div class="cart-header">
+          <button class="back-btn" onclick="showPage('profilePage')">←</button>
+          <h2 class="cart-title">设置</h2>
+        </div>
+
+        <div class="settings-content">
+          <div class="setting-item">
+            <label>用户名</label>
+            <input
+              type="text"
+              id="nameInput"
+              placeholder="输入用户名"
+              value="宝贝"
+            />
+            <button class="save-btn" onclick="updateName()">保存</button>
+          </div>
+          <div class="setting-item">
+            <label>餐厅名字</label>
+            <input
+              type="text"
+              id="restaurantInput"
+              placeholder="输入餐厅名字"
+              value="甜心小厨"
+            />
+            <button class="save-btn" onclick="updateRestaurantName()">
+              保存
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 添加菜单页面 -->
+    <div class="page" id="addDishPage">
+      <div class="container">
+        <div class="cart-header">
+          <button class="back-btn" onclick="showPage('profilePage')">←</button>
+          <h2 class="cart-title">添加菜单</h2>
+        </div>
+
+        <div class="add-dish-content">
+          <div class="form-item">
+            <label>菜品名称</label>
+            <input type="text" id="dishNameInput" placeholder="输入菜品名称" />
+          </div>
+          <div class="form-item">
+            <label>菜品描述</label>
+            <textarea id="dishDescInput" placeholder="输入菜品描述"></textarea>
+          </div>
+          <div class="form-item">
+            <label>菜品价格</label>
+            <input
+              type="number"
+              id="dishPriceInput"
+              placeholder="输入菜品价格"
+              min="0"
+              step="0.01"
+            />
+          </div>
+          <div class="form-item">
+            <label>菜品分类</label>
+            <select id="dishCategoryInput">
+              <option value="signature">招牌必点</option>
+              <option value="hot">热菜</option>
+              <option value="cold">凉菜</option>
+              <option value="dessert">甜品</option>
+              <option value="drink">饮品</option>
+              <option value="staple">主食</option>
+            </select>
+          </div>
+          <div class="form-item">
+            <label>菜品图片</label>
+            <input
+              type="text"
+              id="dishImageInput"
+              placeholder="输入菜品图片URL"
+            />
+          </div>
+          <button class="confirm-btn" style="width: 100%" onclick="addDish()">
+            添加菜品
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 历史订单页 -->
+    <div class="page" id="historyPage">
+      <div class="container history-page">
+        <div class="cart-header">
+          <button class="back-btn" onclick="showPage('profilePage')">←</button>
+          <h2 class="cart-title">历史订单</h2>
+        </div>
+
+        <div id="orderHistory">
+          <!-- 历史订单将通过JavaScript动态生成 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 备注弹窗 -->
+    <div class="modal" id="noteModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">菜品备注</h3>
+          <button class="modal-close" onclick="closeNoteModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <textarea
+            class="review-input"
+            placeholder="宝贝对这道菜有什么特殊要求吗？"
+            id="dishNoteInput"
+          ></textarea>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="modal-btn modal-btn-secondary"
+            onclick="closeNoteModal()"
+          >
+            取消
+          </button>
+          <button class="modal-btn modal-btn-primary" onclick="saveDishNote()">
+            保存
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 订单详情弹窗 -->
+    <div class="modal" id="orderDetailModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">订单详情</h3>
+          <button class="modal-close" onclick="closeOrderDetailModal()">
+            ×
+          </button>
+        </div>
+        <div class="modal-body" id="orderDetailContent">
+          <!-- 订单详情将通过JavaScript动态生成 -->
+        </div>
+        <div class="modal-footer">
+          <button
+            class="modal-btn modal-btn-primary"
+            onclick="closeOrderDetailModal()"
+          >
+            关闭
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 全局变量
+      let dishes = [
+        // 招牌必点
+        {
+          id: 1,
+          name: "糖醋排骨",
+          desc: "酸甜可口，肉质鲜嫩",
+          price: 38,
+          category: "signature",
+          image:
+            "https://img.freepik.com/free-photo/chinese-sweet-sour-pork-ribs_1150-47995.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 2,
+          name: "宫保鸡丁",
+          desc: "香辣可口，经典川菜",
+          price: 28,
+          category: "signature",
+          image:
+            "https://img.freepik.com/free-photo/kung-pao-chicken-close-up_1150-38446.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 3,
+          name: "麻婆豆腐",
+          desc: "麻辣鲜香，豆腐嫩滑",
+          price: 22,
+          category: "signature",
+          image:
+            "https://img.freepik.com/free-photo/mapo-tofu-chinese-food_53876-129979.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 4,
+          name: "红烧肉",
+          desc: "肥而不腻，入口即化",
+          price: 48,
+          category: "signature",
+          image:
+            "https://img.freepik.com/free-photo/chinese-braised-pork-belly_1150-47787.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 5,
+          name: "清蒸鲈鱼",
+          desc: "鲜嫩多汁，清淡可口",
+          price: 58,
+          category: "signature",
+          image:
+            "https://img.freepik.com/free-photo/steamed-fish-with-ginger-scallions_1150-46492.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 6,
+          name: "北京烤鸭",
+          desc: "皮脆肉嫩，香气扑鼻",
+          price: 128,
+          category: "signature",
+          image:
+            "https://img.freepik.com/free-photo/chinese-peking-duck_1150-47623.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 7,
+          name: "水煮鱼",
+          desc: "麻辣鲜香，鱼肉嫩滑",
+          price: 68,
+          category: "signature",
+          image:
+            "https://img.freepik.com/free-photo/spicy-boiled-fish_1150-48003.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 8,
+          name: "东坡肉",
+          desc: "肥而不腻，入口即化",
+          price: 42,
+          category: "signature",
+          image:
+            "https://img.freepik.com/free-photo/dongpo-pork-chinese-cuisine_1150-47991.jpg",
+          isFavorite: false,
+        },
+
+        // 热菜
+        {
+          id: 9,
+          name: "鱼香肉丝",
+          desc: "酸甜可口，配菜丰富",
+          price: 25,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/yuxiang-shredded-pork_1150-47998.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 10,
+          name: "青椒肉丝",
+          desc: "清爽可口，家常风味",
+          price: 22,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-pork-with-green-peppers_1150-47996.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 11,
+          name: "红烧肉丸",
+          desc: "肉质鲜美，口感弹牙",
+          price: 32,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/chinese-meatballs-in-sauce_1150-47990.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 12,
+          name: "炒时蔬",
+          desc: "新鲜蔬菜，营养健康",
+          price: 18,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-vegetables_1150-47988.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 13,
+          name: "蒜蓉西兰花",
+          desc: "清淡爽口，营养丰富",
+          price: 20,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/garlic-broccoli_1150-47987.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 14,
+          name: "可乐鸡翅",
+          desc: "甜香可口，肉质鲜嫩",
+          price: 35,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/coca-cola-chicken-wings_1150-47989.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 15,
+          name: "梅菜扣肉",
+          desc: "肥而不腻，梅香扑鼻",
+          price: 38,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/chinese-braised-pork-with-preserved-vegetables_1150-47992.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 16,
+          name: "酸辣土豆丝",
+          desc: "酸辣爽口，开胃下饭",
+          price: 15,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/sour-spicy-shredded-potatoes_1150-47994.jpg",
+          isFavorite: false,
+        },
+
+        // 凉菜
+        {
+          id: 17,
+          name: "凉拌黄瓜",
+          desc: "清爽开胃，夏日必备",
+          price: 12,
+          category: "cold",
+          image:
+            "https://img.freepik.com/free-photo/cucumber-salad_1150-47985.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 18,
+          name: "凉拌木耳",
+          desc: "清爽可口，营养健康",
+          price: 15,
+          category: "cold",
+          image:
+            "https://img.freepik.com/free-photo/black-fungus-salad_1150-47986.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 19,
+          name: "夫妻肺片",
+          desc: "麻辣鲜香，口感丰富",
+          price: 28,
+          category: "cold",
+          image:
+            "https://img.freepik.com/free-photo/chinese-beef-tripe-salad_1150-47993.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 20,
+          name: "拍黄瓜",
+          desc: "简单爽口，开胃小菜",
+          price: 10,
+          category: "cold",
+          image:
+            "https://img.freepik.com/free-photo/smashed-cucumber-salad_1150-47997.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 21,
+          name: "皮蛋豆腐",
+          desc: "口感滑嫩，味道鲜美",
+          price: 18,
+          category: "cold",
+          image:
+            "https://img.freepik.com/free-photo/preserved-egg-tofu-salad_1150-48000.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 22,
+          name: "盐水鸭",
+          desc: "咸香可口，肉质鲜嫩",
+          price: 35,
+          category: "cold",
+          image:
+            "https://img.freepik.com/free-photo/chinese-salted-duck_1150-48001.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 23,
+          name: "酱牛肉",
+          desc: "酱香浓郁，肉质紧实",
+          price: 45,
+          category: "cold",
+          image:
+            "https://img.freepik.com/free-photo/chinese-braised-beef_1150-48002.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 24,
+          name: "海蜇皮",
+          desc: "清脆爽口，营养丰富",
+          price: 32,
+          category: "cold",
+          image:
+            "https://img.freepik.com/free-photo/jellyfish-salad_1150-48004.jpg",
+          isFavorite: false,
+        },
+
+        // 甜品
+        {
+          id: 25,
+          name: "提拉米苏",
+          desc: "口感丝滑，甜而不腻",
+          price: 22,
+          category: "dessert",
+          image:
+            "https://img.freepik.com/free-photo/tiramisu-dessert_1150-38453.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 26,
+          name: "芒果布丁",
+          desc: "果香浓郁，口感嫩滑",
+          price: 18,
+          category: "dessert",
+          image:
+            "https://img.freepik.com/free-photo/mango-pudding_1150-38454.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 27,
+          name: "巧克力蛋糕",
+          desc: "浓郁丝滑，甜而不腻",
+          price: 25,
+          category: "dessert",
+          image:
+            "https://img.freepik.com/free-photo/chocolate-cake_1150-38455.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 28,
+          name: "冰淇淋",
+          desc: "清凉爽口，多种口味",
+          price: 15,
+          category: "dessert",
+          image:
+            "https://img.freepik.com/free-photo/ice-cream-dessert_1150-38456.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 29,
+          name: "芝士蛋糕",
+          desc: "奶香浓郁，口感绵密",
+          price: 28,
+          category: "dessert",
+          image: "https://img.freepik.com/free-photo/cheesecake_1150-38457.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 30,
+          name: "水果塔",
+          desc: "新鲜水果，酥脆塔皮",
+          price: 22,
+          category: "dessert",
+          image: "https://img.freepik.com/free-photo/fruit-tart_1150-38458.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 31,
+          name: "布丁",
+          desc: "口感嫩滑，甜度适中",
+          price: 12,
+          category: "dessert",
+          image:
+            "https://img.freepik.com/free-photo/pudding-dessert_1150-38459.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 32,
+          name: "焦糖布丁",
+          desc: "焦糖香甜，口感滑嫩",
+          price: 18,
+          category: "dessert",
+          image:
+            "https://img.freepik.com/free-photo/caramel-pudding_1150-38460.jpg",
+          isFavorite: false,
+        },
+
+        // 饮品
+        {
+          id: 33,
+          name: "珍珠奶茶",
+          desc: "香甜可口，Q弹珍珠",
+          price: 18,
+          category: "drink",
+          image: "https://img.freepik.com/free-photo/bubble-tea_1150-38461.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 34,
+          name: "果汁",
+          desc: "新鲜水果，营养健康",
+          price: 15,
+          category: "drink",
+          image:
+            "https://img.freepik.com/free-photo/fresh-fruit-juice_1150-38462.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 35,
+          name: "咖啡",
+          desc: "香气浓郁，提神醒脑",
+          price: 20,
+          category: "drink",
+          image:
+            "https://img.freepik.com/free-photo/cup-of-coffee_1150-38463.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 36,
+          name: "茶",
+          desc: "清香怡人，回味无穷",
+          price: 12,
+          category: "drink",
+          image: "https://img.freepik.com/free-photo/cup-of-tea_1150-38464.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 37,
+          name: "奶昔",
+          desc: "口感浓郁，香甜可口",
+          price: 18,
+          category: "drink",
+          image: "https://img.freepik.com/free-photo/milkshake_1150-38465.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 38,
+          name: "可乐",
+          desc: "清凉解渴，气泡十足",
+          price: 10,
+          category: "drink",
+          image: "https://img.freepik.com/free-photo/coca-cola_1150-38466.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 39,
+          name: "雪碧",
+          desc: "清爽可口，气泡十足",
+          price: 10,
+          category: "drink",
+          image: "https://img.freepik.com/free-photo/sprite_1150-38467.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 40,
+          name: "矿泉水",
+          desc: "纯净解渴，健康饮品",
+          price: 5,
+          category: "drink",
+          image:
+            "https://img.freepik.com/free-photo/bottle-of-water_1150-38468.jpg",
+          isFavorite: false,
+        },
+
+        // 主食
+        {
+          id: 41,
+          name: "蛋炒饭",
+          desc: "粒粒分明，香气四溢",
+          price: 15,
+          category: "staple",
+          image:
+            "https://img.freepik.com/free-photo/egg-fried-rice_1150-38469.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 42,
+          name: "扬州炒饭",
+          desc: "配料丰富，味道鲜美",
+          price: 20,
+          category: "staple",
+          image:
+            "https://img.freepik.com/free-photo/yangzhou-fried-rice_1150-38470.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 43,
+          name: "米饭",
+          desc: "晶莹剔透，口感香糯",
+          price: 5,
+          category: "staple",
+          image:
+            "https://img.freepik.com/free-photo/steamed-rice_1150-38471.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 44,
+          name: "面条",
+          desc: "口感劲道，汤汁鲜美",
+          price: 12,
+          category: "staple",
+          image:
+            "https://img.freepik.com/free-photo/chinese-noodles_1150-38472.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 45,
+          name: "饺子",
+          desc: "皮薄馅大，味道鲜美",
+          price: 25,
+          category: "staple",
+          image:
+            "https://img.freepik.com/free-photo/chinese-dumplings_1150-38473.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 46,
+          name: "包子",
+          desc: "松软可口，馅料丰富",
+          price: 8,
+          category: "staple",
+          image:
+            "https://img.freepik.com/free-photo/chinese-steamed-buns_1150-38474.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 47,
+          name: "馒头",
+          desc: "松软可口，营养健康",
+          price: 3,
+          category: "staple",
+          image:
+            "https://img.freepik.com/free-photo/steamed-buns_1150-38475.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 48,
+          name: "饼",
+          desc: "外酥内软，香气扑鼻",
+          price: 10,
+          category: "staple",
+          image:
+            "https://img.freepik.com/free-photo/chinese-pancake_1150-38476.jpg",
+          isFavorite: false,
+        },
+
+        // 继续添加菜品到100道
+        {
+          id: 49,
+          name: "糖醋里脊",
+          desc: "酸甜可口，外酥内嫩",
+          price: 32,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/sweet-sour-pork_1150-47999.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 50,
+          name: "红烧鱼",
+          desc: "鱼肉鲜嫩，汤汁浓郁",
+          price: 48,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/braised-fish_1150-48005.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 51,
+          name: "炒肝尖",
+          desc: "口感嫩滑，味道鲜美",
+          price: 28,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-liver_1150-48006.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 52,
+          name: "炒腰花",
+          desc: "口感脆嫩，味道鲜美",
+          price: 35,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-pork-kidney_1150-48007.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 53,
+          name: "炒虾仁",
+          desc: "口感嫩滑，味道鲜美",
+          price: 45,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-shrimp_1150-48008.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 54,
+          name: "炒鱿鱼",
+          desc: "口感脆嫩，味道鲜美",
+          price: 38,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-squid_1150-48009.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 55,
+          name: "炒花甲",
+          desc: "鲜美多汁，味道浓郁",
+          price: 32,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-clams_1150-48010.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 56,
+          name: "炒螃蟹",
+          desc: "肉质鲜美，营养丰富",
+          price: 68,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-crab_1150-48011.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 57,
+          name: "炒龙虾",
+          desc: "肉质鲜美，营养丰富",
+          price: 88,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-lobster_1150-48012.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 58,
+          name: "炒扇贝",
+          desc: "肉质鲜美，营养丰富",
+          price: 48,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-scallops_1150-48013.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 59,
+          name: "炒海螺",
+          desc: "肉质鲜美，营养丰富",
+          price: 58,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-conch_1150-48014.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 60,
+          name: "炒海参",
+          desc: "营养丰富，口感嫩滑",
+          price: 98,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-sea-cucumber_1150-48015.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 61,
+          name: "炒鲍鱼",
+          desc: "肉质鲜美，营养丰富",
+          price: 128,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-abalone_1150-48016.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 62,
+          name: "炒鱼翅",
+          desc: "营养丰富，口感嫩滑",
+          price: 198,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-shark-fin_1150-48017.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 63,
+          name: "炒燕窝",
+          desc: "营养丰富，口感嫩滑",
+          price: 298,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-birds-nest_1150-48018.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 64,
+          name: "炒熊掌",
+          desc: "肉质鲜美，营养丰富",
+          price: 398,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-bear-paw_1150-48019.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 65,
+          name: "炒鹿肉",
+          desc: "肉质鲜美，营养丰富",
+          price: 168,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-deer-meat_1150-48020.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 66,
+          name: "炒兔肉",
+          desc: "肉质鲜美，营养丰富",
+          price: 88,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-rabbit-meat_1150-48021.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 67,
+          name: "炒鸽子",
+          desc: "肉质鲜美，营养丰富",
+          price: 98,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-pigeon_1150-48022.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 68,
+          name: "炒鸡胗",
+          desc: "口感脆嫩，味道鲜美",
+          price: 28,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-chicken-gizzards_1150-48023.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 69,
+          name: "炒鸡心",
+          desc: "口感嫩滑，味道鲜美",
+          price: 25,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-chicken-hearts_1150-48024.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 70,
+          name: "炒鸡肝",
+          desc: "口感嫩滑，味道鲜美",
+          price: 22,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-chicken-liver_1150-48025.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 71,
+          name: "炒鸭胗",
+          desc: "口感脆嫩，味道鲜美",
+          price: 32,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-duck-gizzards_1150-48026.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 72,
+          name: "炒鸭心",
+          desc: "口感嫩滑，味道鲜美",
+          price: 28,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-duck-hearts_1150-48027.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 73,
+          name: "炒鸭肝",
+          desc: "口感嫩滑，味道鲜美",
+          price: 25,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-duck-liver_1150-48028.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 74,
+          name: "炒牛肚",
+          desc: "口感脆嫩，味道鲜美",
+          price: 38,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-beef-tripe_1150-48029.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 75,
+          name: "炒牛筋",
+          desc: "口感劲道，味道鲜美",
+          price: 42,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-beef-tendon_1150-48030.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 76,
+          name: "炒牛百叶",
+          desc: "口感脆嫩，味道鲜美",
+          price: 45,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-beef-oyster_1150-48031.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 77,
+          name: "炒羊肚",
+          desc: "口感脆嫩，味道鲜美",
+          price: 48,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-lamb-tripe_1150-48032.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 78,
+          name: "炒羊筋",
+          desc: "口感劲道，味道鲜美",
+          price: 52,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-lamb-tendon_1150-48033.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 79,
+          name: "炒羊百叶",
+          desc: "口感脆嫩，味道鲜美",
+          price: 55,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-lamb-oyster_1150-48034.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 80,
+          name: "炒猪肚",
+          desc: "口感脆嫩，味道鲜美",
+          price: 38,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-pork-tripe_1150-48035.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 81,
+          name: "炒猪筋",
+          desc: "口感劲道，味道鲜美",
+          price: 42,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-pork-tendon_1150-48036.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 82,
+          name: "炒猪大肠",
+          desc: "口感脆嫩，味道鲜美",
+          price: 35,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-pork-intestine_1150-48037.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 83,
+          name: "炒猪血",
+          desc: "口感嫩滑，味道鲜美",
+          price: 22,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-pig-blood_1150-48038.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 84,
+          name: "炒鸭血",
+          desc: "口感嫩滑，味道鲜美",
+          price: 25,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-duck-blood_1150-48039.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 85,
+          name: "炒鸡血",
+          desc: "口感嫩滑，味道鲜美",
+          price: 22,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-chicken-blood_1150-48040.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 86,
+          name: "炒豆腐",
+          desc: "口感嫩滑，味道鲜美",
+          price: 18,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-tofu_1150-48041.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 87,
+          name: "炒豆芽",
+          desc: "口感脆嫩，味道鲜美",
+          price: 15,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-bean-sprouts_1150-48042.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 88,
+          name: "炒土豆",
+          desc: "口感软糯，味道鲜美",
+          price: 18,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-potatoes_1150-48043.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 89,
+          name: "炒茄子",
+          desc: "口感软糯，味道鲜美",
+          price: 20,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-eggplant_1150-48044.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 90,
+          name: "炒黄瓜",
+          desc: "口感脆嫩，味道鲜美",
+          price: 15,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-cucumber_1150-48045.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 91,
+          name: "炒西红柿",
+          desc: "口感酸甜，味道鲜美",
+          price: 18,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-tomatoes_1150-48046.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 92,
+          name: "炒洋葱",
+          desc: "口感脆嫩，味道鲜美",
+          price: 15,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-onions_1150-48047.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 93,
+          name: "炒胡萝卜",
+          desc: "口感脆嫩，味道鲜美",
+          price: 15,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-carrots_1150-48048.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 94,
+          name: "炒青椒",
+          desc: "口感脆嫩，味道鲜美",
+          price: 15,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-green-peppers_1150-48049.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 95,
+          name: "炒红椒",
+          desc: "口感脆嫩，味道鲜美",
+          price: 15,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-red-peppers_1150-48050.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 96,
+          name: "炒黄椒",
+          desc: "口感脆嫩，味道鲜美",
+          price: 15,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-yellow-peppers_1150-48051.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 97,
+          name: "炒紫甘蓝",
+          desc: "口感脆嫩，味道鲜美",
+          price: 18,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-red-cabbage_1150-48052.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 98,
+          name: "炒西兰花",
+          desc: "口感脆嫩，味道鲜美",
+          price: 20,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-broccoli_1150-48053.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 99,
+          name: "炒花椰菜",
+          desc: "口感脆嫩，味道鲜美",
+          price: 18,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-cauliflower_1150-48054.jpg",
+          isFavorite: false,
+        },
+        {
+          id: 100,
+          name: "炒芦笋",
+          desc: "口感脆嫩，味道鲜美",
+          price: 25,
+          category: "hot",
+          image:
+            "https://img.freepik.com/free-photo/stir-fried-asparagus_1150-48055.jpg",
+          isFavorite: false,
+        },
+      ];
+
+      const DISHES_STORAGE_KEY = "dishesMenu";
+
+      // 让“新增/删除菜品”下次打开仍然可见（类似历史订单的本地存储逻辑）
+      function loadDishesFromStorage() {
+        const saved = localStorage.getItem(DISHES_STORAGE_KEY);
+        if (!saved) return;
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            dishes = parsed;
+          }
+        } catch (e) {
+          // 解析失败则回退到默认 dishes
+        }
+      }
+
+      function saveDishesToStorage() {
+        localStorage.setItem(DISHES_STORAGE_KEY, JSON.stringify(dishes));
+      }
+
+      loadDishesFromStorage();
+
+      let cart = [];
+      let currentDishId = null;
+      let orders = [];
+      let userInfo = {
+        name: "宝贝",
+        restaurantName: "甜心小厨",
+      };
+
+      // 初始化
+      function init() {
+        // 加载收藏状态
+        loadFavorites();
+        // 加载订单历史
+        loadOrders();
+        renderDishes();
+        updateCart();
+        renderOrderHistory();
+      }
+
+      // 加载收藏状态
+      function loadFavorites() {
+        const savedFavorites = localStorage.getItem("favorites");
+        if (savedFavorites) {
+          const favoriteIds = JSON.parse(savedFavorites);
+          dishes.forEach((dish) => {
+            dish.isFavorite = favoriteIds.includes(dish.id);
+          });
+        }
+      }
+
+      // 保存收藏状态
+      function saveFavorites() {
+        const favoriteIds = dishes
+          .filter((dish) => dish.isFavorite)
+          .map((dish) => dish.id);
+        localStorage.setItem("favorites", JSON.stringify(favoriteIds));
+      }
+
+      // 显示页面
+      function showPage(pageId) {
+        // 隐藏所有页面
+        document.querySelectorAll(".page").forEach((page) => {
+          page.classList.remove("active");
+        });
+        // 显示目标页面
+        document.getElementById(pageId).classList.add("active");
+
+        // 如果是购物车页面，更新购物车
+        if (pageId === "cartPage") {
+          updateCart();
+        }
+        // 如果是订单确认页面，更新订单信息
+        if (pageId === "orderConfirmPage") {
+          updateOrderConfirm();
+        }
+        // 如果是付款页面，更新付款信息
+        if (pageId === "paymentPage") {
+          updatePayment();
+        }
+      }
+
+      // 渲染菜品列表
+      function renderDishes(category = "all") {
+        const dishList = document.getElementById("dishList");
+        dishList.innerHTML = "";
+
+        const filteredDishes =
+          category === "favorite"
+            ? dishes.filter((dish) => dish.isFavorite)
+            : category === "all"
+              ? dishes
+              : dishes.filter((dish) => dish.category === category);
+
+        filteredDishes.forEach((dish) => {
+          const cartItem = cart.find((item) => item.id === dish.id);
+          const quantity = cartItem ? cartItem.quantity : 0;
+
+          const dishCard = document.createElement("div");
+          dishCard.className = "dish-card";
+          dishCard.innerHTML = `
+                    <img src="${dish.image}" alt="${dish.name}" class="dish-image">
+                    <div class="dish-info">
+                        <div class="dish-head">
+                            <div class="dish-name" style="margin-bottom:0;">${dish.name}</div>
+                            <button class="favorite-btn ${dish.isFavorite ? "active" : ""}" onclick="toggleFavorite(${dish.id})" aria-label="收藏 ${dish.name}">
+                                <i class="${dish.isFavorite ? "fa-solid" : "fa-regular"} fa-heart"></i>
+                            </button>
+                            <button class="menu-delete-btn" onclick="deleteDish(${dish.id})" aria-label="删除 ${dish.name}">
+                              删除
+                            </button>
+                        </div>
+                        <div class="dish-desc">${dish.desc}</div>
+                        <div class="dish-price">¥${dish.price}</div>
+                        <div class="dish-actions">
+                            ${
+                              quantity > 0
+                                ? `
+                                <div class="dish-quantity">
+                                    <button class="quantity-btn" onclick="decreaseQuantity(${dish.id})">-</button>
+                                    <span class="quantity-value">${quantity}</span>
+                                    <button class="quantity-btn" onclick="increaseQuantity(${dish.id})">+</button>
+                                </div>
+                            `
+                                : `
+                                <button class="add-btn" onclick="addToCart(${dish.id})">+</button>
+                            `
+                            }
+                        </div>
+                    </div>
+                `;
+          dishList.appendChild(dishCard);
+        });
+      }
+
+      // 切换收藏状态
+      function toggleFavorite(dishId) {
+        const dish = dishes.find((d) => d.id === dishId);
+        if (dish) {
+          dish.isFavorite = !dish.isFavorite;
+          // 保存收藏状态到本地存储
+          saveFavorites();
+          const activeCategory = document.querySelector(".category-item.active")
+            .dataset.category;
+          renderDishes(activeCategory);
+          showToast(dish.isFavorite ? "已添加到收藏～" : "已从收藏中移除～");
+        }
+      }
+
+      // 删除某一个菜单菜品（从菜单、购物车、收藏状态都移除，并持久化）
+      function deleteDish(dishId) {
+        const idx = dishes.findIndex((d) => d.id === dishId);
+        if (idx === -1) return;
+
+        const deletedName = dishes[idx].name;
+        dishes.splice(idx, 1);
+
+        // 如果该菜在购物车里，直接移除避免引用丢失
+        cart = cart.filter((item) => item.id !== dishId);
+
+        // 持久化菜单 + 更新收藏状态
+        saveDishesToStorage();
+        saveFavorites();
+
+        updateCart();
+        const activeCategory = document.querySelector(".category-item.active")
+          ?.dataset.category;
+        renderDishes(activeCategory || "all");
+        showToast(`已删除菜品：${deletedName}`);
+      }
+
+      // 添加到购物车
+      function addToCart(dishId) {
+        const dish = dishes.find((d) => d.id === dishId);
+        if (!dish) return;
+
+        const existingItem = cart.find((item) => item.id === dishId);
+        if (existingItem) {
+          existingItem.quantity += 1;
+        } else {
+          cart.push({
+            id: dish.id,
+            name: dish.name,
+            price: dish.price,
+            quantity: 1,
+            note: "",
+          });
+        }
+
+        showToast("已加入宝贝的菜单啦～");
+        updateCart();
+        renderDishes(
+          document.querySelector(".category-item.active").dataset.category,
+        );
+
+        // 彩蛋：满3个菜品触发爱心飘落
+        if (cart.reduce((total, item) => total + item.quantity, 0) >= 3) {
+          showHeartAnimation();
+        }
+      }
+
+      // 增加数量
+      function increaseQuantity(dishId) {
+        const item = cart.find((item) => item.id === dishId);
+        if (item) {
+          item.quantity += 1;
+          updateCart();
+          renderDishes(
+            document.querySelector(".category-item.active").dataset.category,
+          );
+        }
+      }
+
+      // 减少数量
+      function decreaseQuantity(dishId) {
+        const itemIndex = cart.findIndex((item) => item.id === dishId);
+        if (itemIndex !== -1) {
+          const item = cart[itemIndex];
+          if (item.quantity > 1) {
+            item.quantity -= 1;
+          } else {
+            cart.splice(itemIndex, 1);
+          }
+          updateCart();
+          renderDishes(
+            document.querySelector(".category-item.active").dataset.category,
+          );
+        }
+      }
+
+      // 更新购物车
+      function updateCart() {
+        const cartItems = document.getElementById("cartItems");
+        const cartEmpty = document.getElementById("cartEmpty");
+        const cartBadge = document.getElementById("cartBadge");
+        const totalAmount = document.getElementById("totalAmount");
+        const totalQuantity = document.getElementById("totalQuantity");
+        const subtotal = document.getElementById("subtotal");
+        const discount = document.getElementById("discount");
+        const finalAmount = document.getElementById("finalAmount");
+
+        if (cart.length === 0) {
+          cartEmpty.style.display = "block";
+          cartItems.style.display = "none";
+          cartBadge.textContent = "0";
+          totalAmount.textContent = "0";
+          totalQuantity.textContent = "0";
+          subtotal.textContent = "0";
+          discount.textContent = "0";
+          finalAmount.textContent = "0";
+        } else {
+          cartEmpty.style.display = "none";
+          cartItems.style.display = "block";
+
+          // 计算总数量和总金额
+          const totalQty = cart.reduce(
+            (total, item) => total + item.quantity,
+            0,
+          );
+          const totalPrice = cart.reduce(
+            (total, item) => total + item.price * item.quantity,
+            0,
+          );
+          const disc = Math.floor(totalPrice * 0.1); // 10%优惠
+          const finalPrice = totalPrice - disc;
+
+          cartBadge.textContent = totalQty;
+          totalAmount.textContent = finalPrice;
+          totalQuantity.textContent = totalQty;
+          subtotal.textContent = totalPrice;
+          discount.textContent = disc;
+          finalAmount.textContent = finalPrice;
+
+          // 渲染购物车项目
+          cartItems.innerHTML = "";
+          cart.forEach((item) => {
+            const cartItem = document.createElement("div");
+            cartItem.className = "cart-item";
+            cartItem.innerHTML = `
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${item.name}</div>
+                            ${item.note ? `<div class="cart-item-note">备注：${item.note}</div>` : ""}
+                            <div class="cart-item-price">¥${item.price} × ${item.quantity} = ¥${item.price * item.quantity}</div>
+                        </div>
+                        <div class="cart-item-actions">
+                            <div class="cart-item-quantity">
+                                <button class="quantity-btn" onclick="decreaseQuantity(${item.id})">-</button>
+                                <span class="quantity-value">${item.quantity}</span>
+                                <button class="quantity-btn" onclick="increaseQuantity(${item.id})">+</button>
+                            </div>
+                            <button class="delete-btn" onclick="removeFromCart(${item.id})">删除</button>
+                            <button class="order-action-btn" onclick="openNoteModal(${item.id})">备注</button>
+                        </div>
+                    `;
+            cartItems.appendChild(cartItem);
+          });
+        }
+      }
+
+      // 从购物车移除
+      function removeFromCart(dishId) {
+        const itemIndex = cart.findIndex((item) => item.id === dishId);
+        if (itemIndex !== -1) {
+          cart.splice(itemIndex, 1);
+          updateCart();
+          renderDishes(
+            document.querySelector(".category-item.active").dataset.category,
+          );
+        }
+      }
+
+      // 打开备注弹窗
+      function openNoteModal(dishId) {
+        currentDishId = dishId;
+        const item = cart.find((item) => item.id === dishId);
+        if (item) {
+          document.getElementById("dishNoteInput").value = item.note;
+        }
+        document.getElementById("noteModal").classList.add("active");
+      }
+
+      // 关闭备注弹窗
+      function closeNoteModal() {
+        document.getElementById("noteModal").classList.remove("active");
+        currentDishId = null;
+      }
+
+      // 保存菜品备注
+      function saveDishNote() {
+        const note = document.getElementById("dishNoteInput").value;
+        const item = cart.find((item) => item.id === currentDishId);
+        if (item) {
+          item.note = note;
+          updateCart();
+        }
+        closeNoteModal();
+      }
+
+      // 更新订单确认页面
+      function updateOrderConfirm() {
+        const orderDishList = document.getElementById("orderDishList");
+        const confirmTotalQuantity = document.getElementById(
+          "confirmTotalQuantity",
+        );
+        const confirmSubtotal = document.getElementById("confirmSubtotal");
+        const confirmDiscount = document.getElementById("confirmDiscount");
+        const confirmFinalAmount =
+          document.getElementById("confirmFinalAmount");
+
+        // 计算总数量和总金额
+        const totalQty = cart.reduce((total, item) => total + item.quantity, 0);
+        const totalPrice = cart.reduce(
+          (total, item) => total + item.price * item.quantity,
+          0,
+        );
+        const disc = Math.floor(totalPrice * 0.1); // 10%优惠
+        const finalPrice = totalPrice - disc;
+
+        confirmTotalQuantity.textContent = totalQty;
+        confirmSubtotal.textContent = totalPrice;
+        confirmDiscount.textContent = disc;
+        confirmFinalAmount.textContent = finalPrice;
+
+        // 渲染订单菜品
+        orderDishList.innerHTML = "";
+        cart.forEach((item) => {
+          const dishItem = document.createElement("div");
+          dishItem.className = "order-dish-item";
+          dishItem.innerHTML = `
+                    <div class="order-dish-info">
+                        <div class="order-dish-name">${item.name}</div>
+                        <div class="order-dish-detail">${item.quantity}份 ${item.note ? `备注：${item.note}` : ""}</div>
+                    </div>
+                    <div class="order-dish-price">¥${item.price * item.quantity}</div>
+                `;
+          orderDishList.appendChild(dishItem);
+        });
+      }
+
+      // 更新付款页面
+      function updatePayment() {
+        const totalPrice = cart.reduce(
+          (total, item) => total + item.price * item.quantity,
+          0,
+        );
+        const disc = Math.floor(totalPrice * 0.1); // 10%优惠
+        const finalPrice = totalPrice - disc;
+
+        document.getElementById("paymentAmount").textContent = finalPrice;
+      }
+
+      // 支付成功
+      function paySuccess() {
+        showHeartAnimation();
+        showToast("支付成功！宝贝请稍等，美食马上就来～");
+
+        // 创建订单
+        const order = {
+          id: Date.now(),
+          time: new Date().toLocaleString(),
+          items: [...cart],
+          total: cart.reduce(
+            (total, item) => total + item.price * item.quantity,
+            0,
+          ),
+          discount: Math.floor(
+            cart.reduce(
+              (total, item) => total + item.price * item.quantity,
+              0,
+            ) * 0.1,
+          ),
+          finalAmount:
+            cart.reduce(
+              (total, item) => total + item.price * item.quantity,
+              0,
+            ) -
+            Math.floor(
+              cart.reduce(
+                (total, item) => total + item.price * item.quantity,
+                0,
+              ) * 0.1,
+            ),
+          status: "已完成",
+          note: document.getElementById("orderNote").value,
+        };
+
+        orders.push(order);
+        // 保存订单到本地存储
+        saveOrders();
+        cart = [];
+
+        // 3秒后跳转到个人中心
+        setTimeout(() => {
+          showPage("profilePage");
+          renderOrderHistory();
+        }, 3000);
+      }
+
+      // 保存订单到本地存储
+      function saveOrders() {
+        localStorage.setItem("orders", JSON.stringify(orders));
+      }
+
+      // 加载订单历史
+      function loadOrders() {
+        const savedOrders = localStorage.getItem("orders");
+        if (savedOrders) {
+          orders = JSON.parse(savedOrders);
+        }
+      }
+
+      // 提交评价
+      function submitReview() {
+        showHeartAnimation();
+        showToast("评价提交成功！宝贝的需求我都收到啦～");
+
+        // 3秒后跳转到个人中心
+        setTimeout(() => {
+          showPage("profilePage");
+        }, 3000);
+      }
+
+      // 渲染历史订单
+      function renderOrderHistory() {
+        const orderHistory = document.getElementById("orderHistory");
+
+        if (orders.length === 0) {
+          orderHistory.innerHTML =
+            '<div style="text-align: center; padding: 60px 0; color: var(--text-secondary);">还没有历史订单哦～</div>';
+          return;
+        }
+
+        orderHistory.innerHTML = "";
+        orders.forEach((order) => {
+          const orderCard = document.createElement("div");
+          orderCard.className = "order-card";
+          orderCard.innerHTML = `
+                    <div class="order-header">
+                        <span class="order-id">订单号：${order.id}</span>
+                        <span class="order-status">${order.status}</span>
+                    </div>
+                    <div class="order-dish-list">
+                        ${order.items.map((item) => `<div class="order-dish-summary">${item.name} × ${item.quantity}</div>`).join("")}
+                    </div>
+                    <div class="order-footer">
+                        <span class="order-amount">¥${order.finalAmount}</span>
+                        <div class="order-actions">
+                            <button class="order-action-btn" onclick="viewOrderDetails(${order.id})">查看详情</button>
+                            <button class="order-action-btn" onclick="reorder(${order.id})">一键再点</button>
+                        </div>
+                    </div>
+                `;
+          orderHistory.appendChild(orderCard);
+        });
+      }
+
+      // 查看订单详情
+      function viewOrderDetails(orderId) {
+        const order = orders.find((o) => o.id === orderId);
+        if (!order) return;
+
+        const orderDetailContent =
+          document.getElementById("orderDetailContent");
+        orderDetailContent.innerHTML = `
+                <div style="margin-bottom: 16px;">
+                    <strong>订单号：</strong>${order.id}
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <strong>下单时间：</strong>${order.time}
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <strong>订单状态：</strong>${order.status}
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <strong>菜品清单：</strong>
+                    <ul style="margin-top: 8px; padding-left: 20px;">
+                        ${order.items.map((item) => `<li>${item.name} × ${item.quantity} - ¥${item.price * item.quantity}</li>`).join("")}
+                    </ul>
+                </div>
+                <div style="margin-bottom: 8px;">
+                    <strong>菜品总价：</strong>¥${order.total}
+                </div>
+                <div style="margin-bottom: 8px;">
+                    <strong>优惠金额：</strong>-¥${order.discount}
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <strong>实付金额：</strong><span style="color: var(--dark-blue); font-weight: bold;">¥${order.finalAmount}</span>
+                </div>
+                ${order.note ? `<div style="margin-bottom: 16px;"><strong>备注：</strong>${order.note}</div>` : ""}
+            `;
+
+        document.getElementById("orderDetailModal").classList.add("active");
+      }
+
+      // 关闭订单详情弹窗
+      function closeOrderDetailModal() {
+        document.getElementById("orderDetailModal").classList.remove("active");
+      }
+
+      // 一键再点
+      function reorder(orderId) {
+        const order = orders.find((o) => o.id === orderId);
+        if (!order) return;
+
+        // 清空当前购物车
+        cart = [];
+
+        // 将订单中的菜品添加到购物车
+        order.items.forEach((item) => {
+          cart.push({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            note: item.note,
+          });
+        });
+
+        showToast("已添加到购物车，宝贝可以继续点菜哦～");
+        updateCart();
+        showPage("cartPage");
+      }
+
+      // 显示Toast提示
+      function showToast(message) {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.classList.add("active");
+
+        setTimeout(() => {
+          toast.classList.remove("active");
+        }, 2000);
+      }
+
+      // 显示爱心动画
+      function showHeartAnimation() {
+        const heart = document.getElementById("heartAnimation");
+        heart.style.animation = "none";
+        void heart.offsetWidth; // 触发重排
+        heart.style.animation = "heartBeat 1.5s ease-in-out";
+      }
+
+      // 分类点击事件
+      document.querySelectorAll(".category-item").forEach((item) => {
+        item.addEventListener("click", function () {
+          // 移除所有分类的active类
+          document
+            .querySelectorAll(".category-item")
+            .forEach((cat) => cat.classList.remove("active"));
+          // 添加当前分类的active类
+          this.classList.add("active");
+          // 渲染对应分类的菜品
+          renderDishes(this.dataset.category);
+        });
+      });
+
+      // 支付方式选择
+      document.querySelectorAll(".payment-method").forEach((method) => {
+        method.addEventListener("click", function () {
+          document.querySelectorAll(".payment-method").forEach((m) => {
+            m.classList.remove("active");
+            m.querySelector(".payment-method-check").textContent = "";
+          });
+          this.classList.add("active");
+          this.querySelector(".payment-method-check").textContent = "✓";
+        });
+      });
+
+      // 星级评分
+      document.querySelectorAll(".stars").forEach((stars) => {
+        stars.querySelectorAll(".star").forEach((star, index) => {
+          star.addEventListener("click", function () {
+            const starsArray = stars.querySelectorAll(".star");
+            starsArray.forEach((s, i) => {
+              if (i <= index) {
+                s.classList.add("active");
+              } else {
+                s.classList.remove("active");
+              }
+            });
+          });
+        });
+      });
+
+      // 显示收藏菜品
+      function showFavorites() {
+        showPage("homePage");
+        // 切换到收藏分类
+        document.querySelectorAll(".category-item").forEach((item) => {
+          if (item.dataset.category === "favorite") {
+            item.classList.add("active");
+          } else {
+            item.classList.remove("active");
+          }
+        });
+        renderDishes("favorite");
+      }
+
+      // 更新用户名
+      function updateName() {
+        const nameInput = document.getElementById("nameInput");
+        const newName = nameInput.value.trim();
+        if (newName) {
+          userInfo.name = newName;
+          document.getElementById("profileName").textContent = newName;
+          showToast("用户名更新成功～");
+        }
+      }
+
+      // 更新餐厅名字
+      function updateRestaurantName() {
+        const restaurantInput = document.getElementById("restaurantInput");
+        const newName = restaurantInput.value.trim();
+        if (newName) {
+          userInfo.restaurantName = newName;
+          document.querySelector(".navbar-title").textContent = newName;
+          showToast("餐厅名字更新成功～");
+        }
+      }
+
+      // 添加菜品
+      function addDish() {
+        const nameInput = document.getElementById("dishNameInput");
+        const descInput = document.getElementById("dishDescInput");
+        const priceInput = document.getElementById("dishPriceInput");
+        const categoryInput = document.getElementById("dishCategoryInput");
+        const imageInput = document.getElementById("dishImageInput");
+
+        const name = nameInput.value.trim();
+        const desc = descInput.value.trim();
+        const price = parseFloat(priceInput.value);
+        const category = categoryInput.value;
+        const image = imageInput.value.trim();
+
+        if (!name || !desc || isNaN(price)) {
+          showToast("请填写完整的菜品信息～");
+          return;
+        }
+        if (!image) {
+          showToast("请填写菜品图片URL（图片需与菜名匹配）～");
+          return;
+        }
+
+        const maxId = dishes.reduce((m, d) => Math.max(m, d.id || 0), 0);
+        const newDish = {
+          id: maxId + 1,
+          name: name,
+          desc: desc,
+          price: price,
+          category: category,
+          image: image,
+          isFavorite: false,
+        };
+
+        dishes.push(newDish);
+        saveDishesToStorage();
+        showToast("菜品添加成功～");
+
+        // 若当前在首页，立即刷新菜品列表（包含“宝贝收藏”分类的过滤）
+        const activeCategory = document.querySelector(".category-item.active")
+          ?.dataset.category;
+        if (activeCategory) renderDishes(activeCategory);
+
+        // 清空表单
+        nameInput.value = "";
+        descInput.value = "";
+        priceInput.value = "";
+        imageInput.value = "";
+      }
+
+      // 初始化
+      init();
+    </script>
+  </body>
+</html>
